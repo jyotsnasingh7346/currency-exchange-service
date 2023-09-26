@@ -23,11 +23,25 @@ public class CurrencyExchangeController {
 	@Autowired
 	private Environment environment;
 	
+	@Autowired
+	private CurrencyExchangeRepository repository;
+	
 	@GetMapping("/currency-exchange/from/{from}/to/{to}")
 	public CurrencyExchange retrieveExchangeValue(@PathVariable String from, @PathVariable String to) {
-		CurrencyExchange currencyExchange = new CurrencyExchange(1000L, from, to, BigDecimal.valueOf(50));
+		
+		// Here, we are hard coding the from & to values.
+//		CurrencyExchange currencyExchange = new CurrencyExchange(1000L, from, to, BigDecimal.valueOf(50));
+		
+		// Here, we are fetching it from the database.
+		CurrencyExchange currencyExchange = repository.findByFromAndTo(from, to);
+		
+		if (currencyExchange == null) {
+			throw new RuntimeException("Unable to find data for " + from + " and " + to);
+		}
+		
 		String port = environment.getProperty("local.server.port");
 		currencyExchange.setEnvironment(port);
+		
 		return currencyExchange;
 	}
 	
